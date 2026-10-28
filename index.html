@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Miaplaza Workbook Catalog</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: #f5f5f5;
+      color: #121212;
+      font-size: 14px;
+    }
+
+    /* ── Header ── */
+    .section-header {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #fff;
+      border-bottom: 1px solid rgba(18,18,18,0.08);
+    }
+
+    header {
+      min-height: 75.8px;
+      padding: 15px 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-logo { height: 60px; width: auto; }
+
+    .header-divider {
+      width: 1px;
+      height: 32px;
+      background: rgba(18,18,18,0.15);
+    }
+
+    .header-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #121212;
+    }
+
+    .header-subtitle {
+      font-size: 12px;
+      color: rgba(18,18,18,0.55);
+      margin-top: 2px;
+    }
+
+    /* ── Notice ── */
+    .notice {
+      background: #fffbeb;
+      border-bottom: 1px solid #fde68a;
+      padding: 12px 40px;
+      font-size: 13px;
+      color: #92400e;
+      line-height: 1.6;
+    }
+
+    .notice strong { color: #78350f; }
+
+    .notice-list { margin: 8px 0 0 20px; display: flex; flex-direction: column; gap: 4px; }
+
+    /* ── Page layout ── */
+    .page-layout {
+      display: flex;
+      align-items: flex-start;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 32px 0 60px;
+      gap: 32px;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { width: 215px; flex-shrink: 0; }
+
+    .sidebar-search {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      background: #fff;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-search:focus { border-color: #121212; }
+
+    .filter-section {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+
+    .filter-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      user-select: none;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .filter-section-header svg {
+      width: 14px; height: 14px; flex-shrink: 0; transition: transform 0.2s;
+    }
+
+    .filter-section.collapsed .filter-section-header svg { transform: rotate(-90deg); }
+    .filter-section.collapsed .filter-section-body { display: none; }
+    .filter-section-body { padding: 12px 16px; }
+
+    .filter-clear {
+      display: block; margin-bottom: 10px; font-size: 12px; color: #6b7280;
+      cursor: pointer; text-decoration: underline; background: none; border: none;
+      padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+
+    .filter-clear:hover { color: #121212; }
+
+    .filter-option {
+      display: flex; align-items: center; gap: 8px; padding: 5px 0;
+      cursor: pointer; font-size: 13px; color: #374151;
+    }
+
+    .filter-option input[type="checkbox"] {
+      width: 14px; height: 14px; accent-color: #121212; cursor: pointer; flex-shrink: 0;
+    }
+
+    .filter-option-count { margin-left: auto; color: #9ca3af; font-size: 12px; }
+
+    .show-more-btn {
+      display: block; margin-top: 8px; font-size: 12px; color: #6b7280;
+      cursor: pointer; background: none; border: none; padding: 0;
+      text-decoration: underline; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+
+    .show-more-btn:hover { color: #121212; }
+
+    /* ── Main content ── */
+    .main-content { flex: 1; min-width: 0; }
+
+    .results-bar { margin-bottom: 20px; }
+    .results-count { font-size: 13px; color: #6b7280; }
+
+    /* ── Grid ── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+      overflow: hidden; display: flex; flex-direction: column;
+      position: relative; transition: box-shadow 0.15s;
+    }
+
+    .card:hover { box-shadow: 0 4px 16px rgba(18,18,18,0.08); }
+
+    .card-img-wrap {
+      position: relative; width: 100%; aspect-ratio: 1 / 1;
+      background: #f9fafb; overflow: hidden;
+    }
+
+    .card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    .badge-coming-soon {
+      position: absolute; top: 10px; left: 10px; background: #121212; color: #fff;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 3px 8px; border-radius: 3px;
+    }
+
+    .card-body {
+      padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1;
+    }
+
+    .card-title { font-size: 13px; font-weight: 500; color: #121212; line-height: 1.4; flex: 1; }
+    .card-price-block { margin-top: 10px; }
+    .price-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+    .price-po { font-size: 17px; font-weight: 700; color: #121212; }
+
+    /* ── States ── */
+    .loading-state, .empty-state {
+      text-align: center; padding: 80px 0; color: #9ca3af;
+      font-size: 15px; grid-column: 1 / -1;
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: linear-gradient(310deg, rgba(1,99,103,1) 15%, rgba(1,132,137,1) 84%);
+      color: #fff;
+      padding: 48px 0 0;
+    }
+
+    .footer-inner {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+
+    /* Navigation columns */
+    .footer-nav {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      padding-bottom: 40px;
+    }
+
+    .footer-col-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .footer-col a { font-size: 13px; color: rgba(255,255,255,0.8); text-decoration: none; }
+    .footer-col a:hover { color: #fff; text-decoration: underline; }
+
+    /* Awards */
+    .footer-awards {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      column-gap: 40px;
+      row-gap: 24px;
+      align-items: center;
+      margin: 40px auto;
+      padding: 4px 0;
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 40px;
+    }
+
+    @media (min-width: 768px) {
+      .footer-awards { margin: 72px auto; }
+    }
+
+    .footer-awards img {
+      height: 120px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    /* Social icons */
+    .footer-social {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      padding: 24px 0;
+      border-top: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .footer-social a { color: rgba(255,255,255,0.8); display: flex; align-items: center; }
+    .footer-social a:hover { color: #fff; }
+
+    /* Bottom bar */
+    .footer-bottom {
+      background: rgba(0,0,0,0.15);
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 8px;
+    }
+
+    .footer-bottom a { color: rgba(255,255,255,0.65); text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; text-decoration: underline; }
+    .footer-bottom .sep { opacity: 0.35; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1180px) {
+      .page-layout { padding: 32px 40px 60px; }
+      .footer-inner { padding: 0 40px; }
+    }
+
+    @media (max-width: 820px) {
+      header { padding: 12px 20px; }
+      .notice { padding: 12px 20px; }
+      .page-layout { flex-direction: column; padding: 20px; gap: 20px; }
+      .sidebar { width: 100%; }
+      .footer-inner { padding: 0 20px; }
+      .footer-nav { gap: 24px; }
+      .footer-bottom { padding: 20px; }
+    }
+
+    @media print {
+      .section-header { position: static; }
+      .sidebar { display: none; }
+      footer { display: none; }
+      .notice { break-inside: avoid; }
+      .card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="section-header">
+  <header>
+    <svg viewBox="0 0 227 60" fill="none" xmlns="http://www.w3.org/2000/svg" class="header-logo"><g clip-path="url(#a)"><path fill="#8C8C8C" d="M24.83 48.461a6.484 6.484 0 0 0-3.995-6.025 6.494 6.494 0 0 0-2.491-.498 6.528 6.528 0 0 0-6.574 6.068 6.522 6.522 0 0 0 5.665 6.924v.75a2.24 2.24 0 0 0-1.363 2.085 2.266 2.266 0 0 0 2.272 2.231 2.185 2.185 0 0 0 2.173-2.231c0-.956-.316-1.765-1.502-2.085v-.75a6.323 6.323 0 0 0 5.816-6.469Z"></path><path fill="url(#b)" d="M75.906 40.907h1.529V34.54c0-2.132-1.126-2.902-2.695-2.902-2.014 0-3.287 1.627-3.287 4.115v5.133h1.778v3.017h-7.455v-3.017h1.51v-6.346c0-2.132-1.127-2.902-2.695-2.902-2.193 0-3.287 1.777-3.287 4.115v5.133h1.778v3.017h-7.61v-3.017h1.687v-9.422h-2.014v-3.033h6.092c.039 1.052-.04 2.105-.237 3.14h.059c.857-2.251 2.765-3.495 5.361-3.495 2.596 0 4.144 1.185 4.56 3.495h.058c.74-2.16 2.458-3.495 5.184-3.495 3.67 0 5.361 2.338 5.361 6.038v6.78h1.778v3.017h-7.455v-3.005Zm11.374-9.442h-2.015v-3.033h6.16v12.463h1.777v3.017H85.59v-3.017h1.687l.004-9.43Zm1.924-10.745c1.719 0 2.766 1.035 2.766 2.575 0 1.54-1.067 2.574-2.766 2.574s-2.765-1.034-2.765-2.574c0-1.54 1.047-2.575 2.765-2.575Zm16.111 13.351c0-2.337-.975-2.961-2.931-2.961a9.423 9.423 0 0 0-2.576.442v2.073h-3.556v-3.949a13.61 13.61 0 0 1 6.191-1.58c4.145 0 6.78 1.45 6.78 5.952 0 2.547-.091 4.675-.146 6.867h1.746v3.017h-5.215v-.948a8.05 8.05 0 0 1 .205-2.132h-.059c-1.035 2.337-2.457 3.431-5.065 3.431-3.492 0-5.183-2.073-5.183-4.498a4.493 4.493 0 0 1 3.109-4.26c1.58-.561 3.67-.711 6.693-.711l.007-.743Zm-1.212 3.286c-3.374 0-4.441.71-4.441 2.041 0 .917.652 1.864 2.28 1.864 1.627 0 3.318-1.066 3.318-3.905h-1.157Zm18.122-6.07a6.24 6.24 0 0 0-1.422-.177c-2.766 0-3.908 2.515-3.908 4.648 0 2.633 1.363 5.133 4.915 5.133a9.09 9.09 0 0 0 3.88-.857l-.237 3.495c-1.51.56-2.576.738-4.65.738-5.271 0-8.056-3.609-8.056-8.079 0-5.003 3.2-8.111 8.142-8.111 1.658-.002 3.307.25 4.888.75v4.53h-3.556l.004-2.07Zm15.459 2.765c0-2.338-.976-2.962-2.931-2.962a9.425 9.425 0 0 0-2.576.442v2.073h-3.556v-3.948a13.61 13.61 0 0 1 6.191-1.58c4.144 0 6.78 1.45 6.78 5.95 0 2.548-.091 4.676-.147 6.868h1.747v3.017h-5.215v-.948a8.05 8.05 0 0 1 .205-2.132h-.059c-1.035 2.338-2.458 3.431-5.065 3.431-3.493 0-5.184-2.073-5.184-4.497a4.496 4.496 0 0 1 3.11-4.261c1.58-.56 3.67-.711 6.692-.711l.008-.742Zm-1.213 3.285c-3.374 0-4.44.71-4.44 2.042 0 .916.652 1.864 2.279 1.864 1.628 0 3.319-1.067 3.319-3.906h-1.158Zm19.841-13.174h-2.37v-3h6.515v19.744h1.777v3.017h-5.835a11.999 11.999 0 0 1 .356-2.99h-.06c-.948 2.16-2.666 3.345-5.27 3.345-3.406 0-6.321-2.456-6.321-7.072 0-4.233 2.042-9.118 8.648-9.118.861.01 1.717.129 2.548.355l.012-4.28Zm-.118 7.843a6.69 6.69 0 0 0-2.636-.56c-2.99 0-4.116 2.369-4.116 4.766s1.153 4.497 3.16 4.497c2.193 0 3.584-1.954 3.584-4.32l.008-4.383Zm12.614 5.114c.119 2.456 2.015 3.949 4.915 3.949a11.437 11.437 0 0 0 5.006-1.066l-.206 3.285a15.477 15.477 0 0 1-5.716.976c-5.982 0-8.498-3.728-8.498-8.02 0-4.826 2.931-8.171 7.787-8.171 5.329 0 7.506 4.024 7.506 9.027l-10.794.02Zm6.278-2.843c0-2.133-1.213-3.345-3.141-3.345s-2.99 1.244-3.16 3.345h6.301Zm26.921 6.63h1.509V34.54c0-2.132-1.126-2.902-2.694-2.902-2.015 0-3.287 1.627-3.287 4.115v5.133h1.777v3.017h-7.435v-3.017h1.509v-6.346c0-2.132-1.126-2.902-2.694-2.902-2.193 0-3.287 1.777-3.287 4.115v5.133h1.778v3.017h-7.613v-3.017h1.687v-9.422h-2.015v-3.033h6.072a14.005 14.005 0 0 1-.237 3.14h.059c.857-2.251 2.766-3.495 5.361-3.495 2.596 0 4.145 1.185 4.56 3.495h.059c.739-2.16 2.457-3.495 5.183-3.495 3.671 0 5.361 2.338 5.361 6.038v6.78h1.778v3.017h-7.435l.004-3.005Zm18.051-12.475h6.93v3.021h-1.399L220.82 44.24c-2.192 5.923-3.998 7.46-7.846 7.46a11.336 11.336 0 0 1-2.252-.356v-3.167a9.52 9.52 0 0 0 2.252.355c1.746 0 2.43-.679 3.88-3.554l-5.926-13.497h-1.423v-3.049h7.701v3.021h-1.581c.241.326.431.685.565 1.066l1.956 5.268c.331.952.569 1.933.711 2.93h.016c.142-.997.38-1.978.711-2.93l1.837-5.268c.133-.38.322-.74.561-1.066h-1.924v-3.02Z"></path><path fill="#5B5B5B" d="M3.208 52.375a.988.988 0 0 1-.983-.928c0-.174-.241-4.344.928-7.132 1.56-3.724 3.16-5.529 4.867-5.529a.988.988 0 1 1 0 1.975c-.126 0-1.288.122-3.046 4.324-.995 2.37-.79 6.215-.79 6.251a.987.987 0 0 1-.928 1.043l-.048-.004Z"></path><path fill="#CECECE" d="M3.11 58.085c-1.66 0-2.841-3.207-2.841-4.538 0-1.33.426-1.804.995-2.325.57-.522 1.85-.522 1.85-.522l-.005 7.385Z"></path><path fill="#CECECE" d="M4.682 57.883c1.616-.37 2.046-3.763 1.746-5.058-.3-1.295-.822-1.663-1.493-2.042-.672-.379-1.916-.09-1.916-.09l1.663 7.19Z"></path><path fill="#B7B7B7" d="M3.109 52.69a1.422 1.422 0 1 0 0-2.843 1.422 1.422 0 0 0 0 2.843Z"></path><path fill="#5B5B5B" d="M34.861 45.693a3.037 3.037 0 0 1-1.185-.225c-1.47-.616-2.509-1.92-3.346-2.966-.395-.49-.984-1.232-1.237-1.31a.972.972 0 0 1-.968-.984 1.002 1.002 0 0 1 1.008-.987c1.106 0 1.864.948 2.741 2.05.731.915 1.58 1.974 2.568 2.369.988.395 3.24-.905 4.469-1.916a.989.989 0 0 1 1.256 1.525c-.557.466-3.086 2.444-5.306 2.444Z"></path><path fill="#CECECE" d="M42.898 37.68c-1.13-.809-3.505.79-4.157 1.699a2.212 2.212 0 0 0-.458 2.085c.13.632 1.004 1.255 1.004 1.255l3.61-5.038Z"></path><path fill="#CECECE" d="M43.853 38.585c.917 1.042-.446 3.554-1.288 4.3a2.212 2.212 0 0 1-2.015.66c-.644-.071-1.35-.873-1.35-.873l4.653-4.087Z"></path><path fill="#B7B7B7" d="M40.527 43.016a1.188 1.188 0 1 0-1.929-1.387 1.188 1.188 0 0 0 1.929 1.387Z"></path><path fill="#999" d="M28.746 27.642H8.024a17.808 17.808 0 0 0 20.722 0Z"></path><path fill="#CECECE" d="M0 28.476c0-9.221 8.23-16.692 18.383-16.692 10.154 0 18.383 7.47 18.383 16.692H0Z"></path><path fill="#B7B7B7" d="m28.746 35.84 4.76 2.84-.477 1.753-5.986 3.989 1.703-8.581Zm-20.722 0-4.76 2.84.478 1.753 5.981 3.989-1.699-8.581Z"></path><path fill="#CECECE" d="M8.024 33.736h20.722v14.73H8.024v-14.73ZM18.384 1.84v11.626V1.84Zm0 12.416a.79.79 0 0 1-.79-.79V1.84a.79.79 0 0 1 1.58 0v11.626a.79.79 0 0 1-.79.79Z"></path><path fill="#CECECE" d="M18.383 3.68a1.84 1.84 0 1 0 0-3.68 1.84 1.84 0 0 0 0 3.68Z"></path><path fill="#3F3F3F" d="M11.478 21.23a1.734 1.734 0 1 0 0-3.468 1.734 1.734 0 0 0 0 3.467Z"></path><path fill="#F2F2F2" d="M11.477 21.822a2.328 2.328 0 0 1-2.282-2.78 2.326 2.326 0 0 1 4.217-.838 2.325 2.325 0 0 1-1.935 3.618Zm0-3.467a1.142 1.142 0 1 0 0 2.283 1.142 1.142 0 0 0 0-2.283Z"></path><path fill="#3F3F3F" d="M25.29 21.23a1.734 1.734 0 1 0 0-3.469 1.734 1.734 0 0 0 0 3.468Z"></path><path fill="#F2F2F2" d="M25.285 21.822a2.328 2.328 0 0 1-2.282-2.78 2.325 2.325 0 0 1 3.172-1.695 2.327 2.327 0 0 1 1.437 2.149 2.33 2.33 0 0 1-2.327 2.326Zm0-3.467a1.142 1.142 0 1 0 0 2.283 1.142 1.142 0 0 0 0-2.283Z"></path><path fill="#5B5B5B" d="M18.383 26.351c-3.185 0-4.085-2.274-4.125-2.37a.987.987 0 1 1 1.841-.718c.055.127.545 1.118 2.284 1.118 1.738 0 2.236-1.003 2.283-1.118a.98.98 0 0 1 1.273-.56.996.996 0 0 1 .58 1.275c-.047.11-.952 2.373-4.136 2.373Z"></path></g><defs><linearGradient id="b" x1="55.148" x2="227" y1="36.216" y2="36.216" gradientUnits="userSpaceOnUse"><stop stop-color="#FF913C"></stop><stop offset="1" stop-color="#FF6950"></stop></linearGradient><clipPath id="a"><path fill="#fff" d="M0 0h227v60H0z"></path></clipPath></defs></svg>
+    <div class="header-divider"></div>
+    <div>
+      <div class="header-title">Workbook Catalog</div>
+      <div class="header-subtitle">Purchase Order Pricing</div>
+    </div>
+
+  </header>
+</div>
+
+<div class="notice">
+  When placing an order via your state funding program or charter school, there is a $10 handling fee per book included in the price.
+  <ul class="notice-list">
+    <li>For orders via state funding programs, email <strong>statefunding@mia.school</strong></li>
+    <li>For orders via charter schools, email <strong>charters@mia.school</strong></li>
+    <li>For bulk orders of 50+ items, email <strong>orders@mia.school</strong></li>
+  </ul>
+</div>
+
+<div class="page-layout">
+  <aside class="sidebar">
+    <input type="text" class="sidebar-search" id="search" placeholder="Search workbooks&hellip;" oninput="renderCards()" />
+
+    <div class="filter-section" id="filter-section-tags">
+      <div class="filter-section-header" onclick="toggleSection('filter-section-tags')">
+        Filter by Tag
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
+        </svg>
+      </div>
+      <div class="filter-section-body">
+        <button class="filter-clear" id="clear-tags" onclick="clearTags()" style="display:none">Clear all</button>
+        <div id="tag-filters"></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="results-bar">
+      <span class="results-count" id="results-count">Loading&hellip;</span>
+    </div>
+    <div id="content">
+      <div class="grid">
+        <div class="loading-state">Loading catalog&hellip;</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer>
+  <div class="footer-inner">
+
+    <div class="footer-nav">
+      <div class="footer-col">
+        <div class="footer-col-title">miaplaza</div>
+        <ul>
+          <li><a href="https://miacademy.co/help/about">Team</a></li>
+          <li><a href="https://careers.miaplaza.com/">Careers</a></li>
+          <li><a href="https://miacademy.co/help/contact">Contact us</a></li>
+          <li><a href="https://miacademy.co/homeschool-curriculum/miaplaza-accessibility-statement">Accessibility Statement</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">resources</div>
+        <ul>
+          <li><a href="https://miacademy.co/homeschool-curriculum/faq/">FAQ</a></li>
+          <li><a href="https://miacademy.co/homeschool-curriculum/k8-curriculum/">K-8 Curriculum</a></li>
+          <li><a href="https://shop.miacademy.co/">Workbooks Store</a></li>
+          <li><a href="https://miacademy.co/homeschool-curriculum/how-to-homeschool/">Homeschooling Guide</a></li>
+          <li><a href="https://miacademy.co/help/terms">Terms of service</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">account</div>
+        <ul>
+          <li><a href="https://miacademy.co/login">Student Login</a></li>
+          <li><a href="https://parents.miacademy.co/login?forcePassword=True">Parent Login</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <ul class="footer-awards">
+      <li><img src="assets/award_ilearn.png" alt="i-Learn Award" /></li>
+      <li><img src="assets/award_certified_autism_resource.png" alt="Certified Autism Resource" /></li>
+      <li><img src="assets/award_how_to_homeschool.png" alt="How to Homeschool Award" /></li>
+      <li><img src="assets/award_great_place_to_work.png" alt="Great Place to Work" /></li>
+    </ul>
+
+    <div class="footer-social">
+      <a href="https://www.facebook.com/miacademylearning/" aria-label="Facebook" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/miacademylearning/" aria-label="Instagram" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://www.tiktok.com/@miaplazalearning" aria-label="TikTok" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+      </a>
+      <a href="https://www.youtube.com/@MiacademyLearningChannelK-8" aria-label="YouTube" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.495 6.205a3.007 3.007 0 0 0-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 0 0 .527 6.205a31.247 31.247 0 0 0-.522 5.805 31.247 31.247 0 0 0 .522 5.783 3.007 3.007 0 0 0 2.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 0 0 2.088-2.088 31.247 31.247 0 0 0 .5-5.783 31.247 31.247 0 0 0-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/></svg>
+      </a>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <a href="https://miacademy.co/help/privacy">Privacy Policy</a>
+    <span class="sep">|</span>
+    <a href="https://shop.miacademy.co/policies/refund-policy">Refund policy</a>
+    <span class="sep">|</span>
+    <span>&copy; 2026, Miaplaza, Inc.</span>
+  </div>
+</footer>
+
+<script>
+  const MARKUP = 10;
+  const STORE_URL = "https://shop.miacademy.co";
+  const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Crect width='240' height='240' fill='%23f3f4f6'/%3E%3C/svg%3E";
+  const SHOW_MORE_THRESHOLD = 8;
+
+  let allProducts = [];
+  let activeTags = new Set();
+  let showAllTags = false;
+  let allTagData = [];
+
+  async function fetchAllProducts() {
+    let products = [];
+    let page = 1;
+    while (true) {
+      const res = await fetch(`${STORE_URL}/products.json?limit=250&page=${page}`);
+      const data = await res.json();
+      if (!data.products || data.products.length === 0) break;
+      products = products.concat(data.products);
+      if (data.products.length < 250) break;
+      page++;
+    }
+    return products;
+  }
+
+  function getPrice(product) {
+    const variant = product.variants[0];
+    return variant ? parseFloat(variant.price) : null;
+  }
+
+  function getImage(product) {
+    return product.images && product.images.length > 0
+      ? product.images[0].src
+      : PLACEHOLDER;
+  }
+
+  function formatPrice(n) {
+    return "$" + n.toFixed(2).replace(/\.00$/, "");
+  }
+
+  function getAllTagData(products) {
+    const tagCount = {};
+    products.forEach(p => p.tags.forEach(t => {
+      tagCount[t] = (tagCount[t] || 0) + 1;
+    }));
+    return Object.entries(tagCount)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([tag, count]) => ({ tag, count }));
+  }
+
+  function toggleSection(id) {
+    document.getElementById(id).classList.toggle("collapsed");
+  }
+
+  function clearTags() {
+    activeTags.clear();
+    document.querySelectorAll("#tag-filters input[type='checkbox']").forEach(cb => cb.checked = false);
+    document.getElementById("clear-tags").style.display = "none";
+    renderCards();
+  }
+
+  function renderTags(tagData) {
+    const container = document.getElementById("tag-filters");
+    container.innerHTML = "";
+    const visible = showAllTags ? tagData : tagData.slice(0, SHOW_MORE_THRESHOLD);
+
+    visible.forEach(({ tag, count }) => {
+      const label = document.createElement("label");
+      label.className = "filter-option";
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = activeTags.has(tag);
+      cb.onchange = () => {
+        if (cb.checked) activeTags.add(tag);
+        else activeTags.delete(tag);
+        document.getElementById("clear-tags").style.display = activeTags.size > 0 ? "block" : "none";
+        renderCards();
+      };
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = tag;
+
+      const countSpan = document.createElement("span");
+      countSpan.className = "filter-option-count";
+      countSpan.textContent = count;
+
+      label.appendChild(cb);
+      label.appendChild(nameSpan);
+      label.appendChild(countSpan);
+      container.appendChild(label);
+    });
+
+    if (tagData.length > SHOW_MORE_THRESHOLD) {
+      const btn = document.createElement("button");
+      btn.className = "show-more-btn";
+      btn.textContent = showAllTags
+        ? "Show less"
+        : `Show ${tagData.length - SHOW_MORE_THRESHOLD} more`;
+      btn.onclick = () => {
+        showAllTags = !showAllTags;
+        renderTags(tagData);
+      };
+      container.appendChild(btn);
+    }
+  }
+
+  function renderCards() {
+    const query = document.getElementById("search").value.toLowerCase().trim();
+    const filtered = allProducts.filter(p => {
+      const matchesSearch = !query || p.title.toLowerCase().includes(query);
+      const matchesTag = activeTags.size === 0 || [...activeTags].every(t => p.tags.includes(t));
+      return matchesSearch && matchesTag;
+    });
+
+    document.getElementById("results-count").textContent =
+      filtered.length === allProducts.length
+        ? `${allProducts.length} products`
+        : `${filtered.length} of ${allProducts.length} products`;
+
+    const grid = document.createElement("div");
+    grid.className = "grid";
+
+    if (filtered.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "No workbooks found.";
+      grid.appendChild(empty);
+    } else {
+      filtered.forEach(product => {
+        const retailPrice = getPrice(product);
+        if (retailPrice === null) return;
+        const poPrice = retailPrice + MARKUP;
+        const inStock = product.variants.some(v => v.available);
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        const imgWrap = document.createElement("div");
+        imgWrap.className = "card-img-wrap";
+
+        const img = document.createElement("img");
+        img.src = getImage(product);
+        img.alt = product.title;
+        img.loading = "lazy";
+        img.onerror = () => { img.src = PLACEHOLDER; };
+
+        if (!inStock) {
+          const badge = document.createElement("span");
+          badge.className = "badge-coming-soon";
+          badge.textContent = "Coming Soon";
+          imgWrap.appendChild(badge);
+        }
+
+        imgWrap.appendChild(img);
+
+        const body = document.createElement("div");
+        body.className = "card-body";
+
+        const title = document.createElement("div");
+        title.className = "card-title";
+        title.textContent = product.title;
+
+        const priceBlock = document.createElement("div");
+        priceBlock.className = "card-price-block";
+
+        const priceLabel = document.createElement("div");
+        priceLabel.className = "price-label";
+        priceLabel.textContent = "PO Price";
+
+        const priceRow = document.createElement("div");
+
+        const poSpan = document.createElement("span");
+        poSpan.className = "price-po";
+        poSpan.textContent = formatPrice(poPrice);
+
+
+        priceRow.appendChild(poSpan);
+        priceBlock.appendChild(priceLabel);
+        priceBlock.appendChild(priceRow);
+
+        body.appendChild(title);
+        body.appendChild(priceBlock);
+
+        card.appendChild(imgWrap);
+        card.appendChild(body);
+        grid.appendChild(card);
+      });
+    }
+
+    const content = document.getElementById("content");
+    content.innerHTML = "";
+    content.appendChild(grid);
+  }
+
+  async function init() {
+    try {
+      allProducts = await fetchAllProducts();
+      allProducts.sort((a, b) => a.title.localeCompare(b.title));
+      allTagData = getAllTagData(allProducts);
+      renderTags(allTagData);
+      renderCards();
+    } catch (e) {
+      document.getElementById("content").innerHTML =
+        '<div class="grid"><div class="loading-state">Failed to load catalog. Please try again later.</div></div>';
+      document.getElementById("results-count").textContent = "";
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
